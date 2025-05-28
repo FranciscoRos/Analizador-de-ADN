@@ -88,10 +88,10 @@ fun fusionarFrecuencias(frecuenciasPorArchivo: Map<String, Map<String, Int>>): M
 
 fun imprimirTabla(titulo: String, filas: List<Pair<String, Int>>) {
     println("\n== $titulo ==")
-    println("%-12s %10s".format("Palabra", "Frecuencia"))
-    println("-".repeat(24))
+    println("Palabra   Frecuencia")
+    println("-------------------------")
     filas.forEach { (palabra, frecuencia) ->
-        println("%-12s %10d".format(palabra, frecuencia))
+        println(("$palabra   $frecuencia"))
     }
 }
 
@@ -131,22 +131,22 @@ fun main() {
     val frecuenciaGlobal = fusionarFrecuencias(frecuenciasPorArchivo)
     imprimirTabla("Frecuencias globales", ordenarFrecuencias(frecuenciaGlobal))
 
-    // Paso 7: Imprimir frecuencias individuales por archivo
+    //Imprimir frecuencias individuales por archivo
     frecuenciasPorArchivo.forEach { (nombre, frecuencia) ->
         imprimirTabla("Archivo: $nombre", ordenarFrecuencias(frecuencia))
     }
 
-    // Paso 8: Búsqueda interactiva de palabras
+    //Búsqueda interactiva de palabras
     println("\nPuedes buscar palabras de longitud $tamañoPalabra. Teclea 'salir' para terminar.")
     while (true) {
         print("buscar> ")
-        val consulta = readln().uppercase()               // Convierte la consulta a mayúsculas
-        if (consulta == "SALIR") break                   // Sale del bucle si el usuario teclea 'salir'
-        if (consulta.length != tamañoPalabra) {                       // Valida longitud de la palabra
+        val consulta = readln().uppercase()
+        if (consulta == "SALIR") break
+        if (consulta.length != tamañoPalabra) {
             println("[Error] La palabra debe tener longitud $tamañoPalabra.")
             continue
         }
-        val frecuenciaTotal = frecuenciaGlobal[consulta] ?: 0 // Consulta en el mapa global
+        val frecuenciaTotal = frecuenciaGlobal[consulta] ?: 0
         if (frecuenciaTotal == 0) {
             println("No se encontró la palabra $consulta en ningún archivo.")
         } else {
@@ -156,5 +156,5 @@ fun main() {
         }
     }
 
-    println("\nPrograma finalizado. ¡Hasta luego!") // Mensaje final
+    println("\nPrograma finalizado. ¡Hasta luego!")
 }
