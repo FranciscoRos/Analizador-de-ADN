@@ -35,6 +35,7 @@ fun leerArchivoFasta(ruta: Path): ArchivoFasta {
     return ArchivoFasta(ruta.toString(), secuenciaConcatenada, contienePlasmidos)
 }
 
+
 fun filtrarPartes( cuerpoArchivo: List<String> ): Pair<List<String>,List<String>> {
     val cabeceras = mutableListOf<String>()
     val lineasSecuencia = mutableListOf<String>()
@@ -49,13 +50,14 @@ fun filtrarPartes( cuerpoArchivo: List<String> ): Pair<List<String>,List<String>
     return Pair(cabeceras,lineasSecuencia)
 }
 
+
 // Función que genera todas las subcadenas
 fun generarKPalabras(secuencia: String, k: Int): List<String> {
     return if (secuencia.length < k) {
         emptyList()
     } else {
-        (0..(secuencia.length - k) ).map { i ->
-            secuencia.substring(i, (i + k) )
+        (0..(secuencia.length - k) ).map { indice ->
+            secuencia.substring(indice, (indice + k) )
         }
     }
 }
@@ -75,11 +77,13 @@ fun ordenarFrecuencias(frecuencias: Map<String, Int>): List<Pair<String, Int>> =
 
 
 fun fusionarFrecuencias(frecuenciasPorArchivo: Map<String, Map<String, Int>>): Map<String, Int> {
-    return frecuenciasPorArchivo.values
-        .flatMap { it.entries }
-        .groupBy { it.key }
+    return frecuenciasPorArchivo.values //quitamos nombres, solo trabajamos con Collection<Map<String, Int>> como [ {A→3, B→5}, {A→1, C→4}, {B→2, C→1} ]
+        .flatMap { it.entries }         //forzamos a todas las listas a ser una Map.Entry<String, Int> [Entry(A,3), Entry(B,5), Entry(A,1), Entry(C,4), Entry(B,2), Entry(C,1)]
+        .groupBy { it.key }             //se agrupa por clave Map<String,List <String,Int> > { "A"→[Entry(A,3), Entry(A,1)], "B"→[Entry(B,5), Entry(B,2)], "C"→[Entry(C,4), Entry(C,1)] }
         .mapValues { par ->
+            // par.key es la clave "A"
             val grupo = par.value
+            // par.value es la lista [Entry(A,3), Entry(A,1)]
             grupo.sumOf { it.value }
         }
 }
@@ -98,7 +102,7 @@ fun imprimirTabla(titulo: String, filas: List<Pair<String, Int>>) {
 fun main() {
 
     print("Introduce rutas de archivos FASTA/FNA (5 o más) separadas por espacio: ")
-    //Lista de Strings List<String>
+    //rutasArchivos es una lista de Strings List<String>
     val rutasArchivos = readln().trim().split(" ").filter { it.isNotBlank() } // Separa por espacios y filtra vacíos
 
     if( rutasArchivos.size < 5){
@@ -111,16 +115,21 @@ fun main() {
 
     // Informar si algún archivo contiene plásmidos
     val contienenPlasmidos = archivosFasta.filter { it.contienePlasmidos }
-    contienenPlasmidos.forEach { println("[Notificación:] El archivo ${it.nombreArchivo} contiene plásmidos concatenados.") }
+    contienenPlasmidos.forEach { println("[Notificación:] El archivo ${it.nombreArchivo} contiene plásmidos, ya se unieron para su evaluación integral.") }
 
     // Pedir tamaño de la palabray validarlo
     var tamañoPalabra: Int
     while (true) {
         print("Introduce el tamaño de la palabra a buscar (6–17): ")
         tamañoPalabra = readln().toIntOrNull() ?: -1                    // Convierte entrada a entero o -1 si es inválido
-        if (tamañoPalabra >5  && tamañoPalabra < 17 ) break
+        if (tamañoPalabra >5  && tamañoPalabra < 17 ){
+            break
+        }
         else println("Valor inválido. Intenta de nuevo.")
     }
+
+    //Verificamos si es ARN
+
 
     // Calcular frecuencias de k‑palabras por archivo
     val frecuenciasPorArchivo: Map<String, Map<String, Int>> = archivosFasta.associate { archivo ->
@@ -152,7 +161,7 @@ fun main() {
         } else {
             val archivosCoincidentes = frecuenciasPorArchivo.filter { (_, mapa) -> consulta in mapa } // Archivos donde aparece
             println("La palabra $consulta aparece $frecuenciaTotal veces en ${archivosCoincidentes.size} archivos:")
-            archivosCoincidentes.forEach { (nombre, mapa) -> println(" • $nombre: ${mapa[consulta]} veces") }
+            archivosCoincidentes.forEach { (nombre, mapa) -> println(" - $nombre: ${mapa[consulta]} veces") }
         }
     }
 
